@@ -1,10 +1,328 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru" class="scroll-smooth">
 <head>
-    <title>Redirecting...</title>
-    <meta http-equiv="refresh" content="0; url=food-delivery.html" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Умная доставка еды с AI-помощником">
+    <title>Еда — Умная Доставка</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="food-delivery-styles.css">
 </head>
 <body>
-    <p>Если перенаправление не сработало, пожалуйста, <a href="food-delivery.html">нажмите здесь</a>.</p>
+    <div class="app-wrapper">
+        <header class="header" id="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="header-brand">
+                        <a href="#" class="logo" id="brand">
+                            <svg class="logo-icon" width="44" height="44" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <rect width="48" height="48" rx="12" fill="#FF6B35"/>
+                                <path d="M14 18C14 16.8954 14.8954 16 16 16H32C33.1046 16 34 16.8954 34 18V20H18V24H30C31.1046 24 32 24.8954 32 26V30C32 31.1046 31.1046 32 30 32H16C14.8954 32 14 31.1046 14 30V18Z" fill="white"/>
+                            </svg>
+                            <span class="logo-text">Еда</span>
+                        </a>
+                    </div>
+
+                    <nav class="header-nav">
+                        <button class="location-btn" id="address-btn">
+                            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span id="address-display">Укажите адрес</span>
+                            <svg class="icon icon-small" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+
+                        <div class="search-wrapper">
+                            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                            <input
+                                type="text"
+                                id="manual-search"
+                                class="search-input"
+                                placeholder="Поиск ресторанов и блюд..."
+                                autocomplete="off"
+                            >
+                        </div>
+                    </nav>
+
+                    <div class="header-actions">
+                        <button class="icon-btn cart-btn" id="cart-btn" aria-label="Корзина">
+                            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            <span class="cart-badge" id="cart-count">0</span>
+                        </button>
+
+                        <div class="user-area" id="user-area">
+                            <button class="login-btn" id="login-button">Войти</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="container">
+                <section class="hero-section">
+                    <div class="hero-card">
+                        <div class="hero-content">
+                            <div class="hero-text">
+                                <h1 class="hero-title">Не знаете, что поесть?</h1>
+                                <p class="hero-subtitle">Опишите настроение и бюджет — AI предложит идеальные варианты</p>
+
+                                <div class="ai-input-group">
+                                    <textarea
+                                        id="ai-prompt"
+                                        class="ai-textarea"
+                                        rows="3"
+                                        placeholder="Например: Хочу что-то сытное до 600₽"
+                                    ></textarea>
+
+                                    <div class="ai-actions">
+                                        <button class="btn btn-primary" id="ai-button">
+                                            <span id="ai-button-text">Найти блюдо</span>
+                                            <svg id="ai-loader" class="spinner hidden" width="20" height="20" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"></circle>
+                                                <path fill="currentColor" d="M12 2a10 10 0 0 1 10 10h-4a6 6 0 0 0-6-6V2z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-secondary" id="ai-clear">Очистить</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ai-result-wrapper" id="ai-result-container">
+                                <div class="ai-placeholder" id="ai-placeholder">
+                                    <svg class="ai-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                                        <path d="M20 3v4m-2-2h4"></path>
+                                    </svg>
+                                    <p class="ai-placeholder-text">Здесь появятся рекомендации...</p>
+                                </div>
+
+                                <div class="ai-result hidden" id="ai-result">
+                                    <h3 class="ai-result-title">Рекомендации:</h3>
+                                    <div class="ai-output" id="ai-output"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="categories-section">
+                    <div class="categories-scroll" id="categories-container"></div>
+                </section>
+
+                <section class="restaurants-section">
+                    <div class="restaurant-grid" id="restaurant-grid"></div>
+                </section>
+            </div>
+        </main>
+
+        <button class="support-btn" id="support-btn" aria-label="Поддержка">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </button>
+
+        <div class="modal-overlay" id="auth-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="icon-btn modal-back hidden" id="auth-back-button" aria-label="Назад">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                    </button>
+                    <h2 class="modal-title" id="auth-title">Войдите</h2>
+                    <button class="icon-btn modal-close" id="auth-close-button" aria-label="Закрыть">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="auth-screens">
+                        <div id="screen-main" class="auth-screen">
+                            <div class="tabs" id="login-method-buttons">
+                                <button class="tab active" id="tab-email">Почта</button>
+                                <button class="tab" id="tab-phone">Телефон</button>
+                            </div>
+
+                            <div id="login-email-screen" class="auth-form">
+                                <div class="form-group">
+                                    <input
+                                        type="text"
+                                        id="login-email-input"
+                                        class="input"
+                                        placeholder="Email или логин"
+                                        autocomplete="email"
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="input-with-icon">
+                                        <input
+                                            type="password"
+                                            id="login-password-input"
+                                            class="input"
+                                            placeholder="Пароль"
+                                            autocomplete="current-password"
+                                        >
+                                        <button class="input-icon-btn" id="toggle-login-pw" type="button">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button class="btn btn-dark btn-full" id="login-submit-button">Войти</button>
+                                    <button class="btn btn-light btn-full" id="go-to-register-button">Создать аккаунт</button>
+                                </div>
+                            </div>
+
+                            <div id="login-phone-screen" class="auth-form hidden">
+                                <div class="form-group">
+                                    <div class="phone-input">
+                                        <button class="phone-code-btn">
+                                            <span id="country-code-display">+7</span>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </button>
+                                        <input
+                                            type="tel"
+                                            id="login-phone-input"
+                                            class="input phone-number-input"
+                                            placeholder="Номер телефона"
+                                            autocomplete="tel"
+                                        >
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-dark btn-full" id="phone-submit-button">Получить код</button>
+                            </div>
+                        </div>
+
+                        <div id="screen-code" class="auth-screen hidden">
+                            <p class="text-center text-secondary">
+                                Мы отправили код на номер <strong id="code-phone-display"></strong>
+                            </p>
+
+                            <div class="form-group">
+                                <input
+                                    type="text"
+                                    id="sms-code-input"
+                                    class="input code-input"
+                                    maxlength="4"
+                                    placeholder="••••"
+                                    autocomplete="one-time-code"
+                                >
+                                <p class="error-message hidden" id="code-error-message">Неверный код</p>
+                            </div>
+
+                            <div class="form-actions">
+                                <button class="btn btn-primary btn-full" id="code-submit-button">Подтвердить</button>
+                                <button class="btn btn-text btn-full" id="resend-code-button">Отправить код повторно</button>
+                            </div>
+                        </div>
+
+                        <div id="screen-register" class="auth-screen hidden">
+                            <p class="text-center text-secondary">Создайте аккаунт</p>
+
+                            <div class="tabs" id="register-method-buttons">
+                                <button class="tab active" id="reg-tab-phone">Телефон</button>
+                                <button class="tab" id="reg-tab-email">Почта</button>
+                            </div>
+
+                            <div id="register-phone-screen" class="auth-form">
+                                <div class="form-group">
+                                    <div class="phone-input">
+                                        <button class="phone-code-btn">
+                                            <span>+7</span>
+                                        </button>
+                                        <input
+                                            type="tel"
+                                            id="register-phone-input"
+                                            class="input phone-number-input"
+                                            placeholder="Номер телефона"
+                                            autocomplete="tel"
+                                        >
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-primary btn-full" id="register-phone-submit-button">Продолжить</button>
+                            </div>
+
+                            <div id="register-email-screen" class="auth-form hidden">
+                                <div class="form-group">
+                                    <input
+                                        type="email"
+                                        id="register-email-input"
+                                        class="input"
+                                        placeholder="Почта"
+                                        autocomplete="email"
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="input-with-icon">
+                                        <input
+                                            type="password"
+                                            id="register-password-input"
+                                            class="input"
+                                            placeholder="Пароль"
+                                            autocomplete="new-password"
+                                        >
+                                        <button class="input-icon-btn" id="toggle-reg-pw" type="button">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="password-strength">
+                                        <div class="password-strength-bar" id="pw-strength-bar"></div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <input
+                                        type="password"
+                                        id="register-confirm-password-input"
+                                        class="input"
+                                        placeholder="Повторите пароль"
+                                        autocomplete="new-password"
+                                    >
+                                </div>
+
+                                <button class="btn btn-primary btn-full" id="register-email-submit-button">Зарегистрироваться</button>
+
+                                <p class="text-terms">Продолжая, вы соглашаетесь с Условиями использования</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="food-delivery-app.js"></script>
 </body>
 </html>
