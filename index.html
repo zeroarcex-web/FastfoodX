@@ -1,328 +1,364 @@
 <!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Умная доставка еды с AI-помощником">
-    <title>Еда — Умная Доставка</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <title>Document</title>
 </head>
 <body>
-    <div class="app-wrapper">
-        <header class="header" id="header">
-            <div class="container">
-                <div class="header-content">
-                    <div class="header-brand">
-                        <a href="#" class="logo" id="brand">
-                            <svg class="logo-icon" width="44" height="44" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <rect width="48" height="48" rx="12" fill="#FF6B35"/>
-                                <path d="M14 18C14 16.8954 14.8954 16 16 16H32C33.1046 16 34 16.8954 34 18V20H18V24H30C31.1046 24 32 24.8954 32 26V30C32 31.1046 31.1046 32 30 32H16C14.8954 32 14 31.1046 14 30V18Z" fill="white"/>
-                            </svg>
-                            <span class="logo-text">Еда</span>
-                        </a>
-                    </div>
+    <p>
+        # rmb_zone_intro_responsive_cursor.py
+"""
+Responsive RMB Zone intro — Pygame
+- Автоподгонка шрифта, адаптивный layout при resize/fullscreen
+- Фон = background.png (cover)
+- Фон плавно появляется, затем буквы, затем 10s и появляется кнопка/hint
+- Курсор скрыт до появления кнопки, появляется когда кнопка видна
+- START_FULLSCREEN = True -> стартовать сразу в fullscreen
+Requires: pygame
+"""
 
-                    <nav class="header-nav">
-                        <button class="location-btn" id="address-btn">
-                            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-                            <span id="address-display">Укажите адрес</span>
-                            <svg class="icon icon-small" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="6 9 12 15 18 9"></polyline>
-                            </svg>
-                        </button>
+import pygame, sys, os, time, math
 
-                        <div class="search-wrapper">
-                            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="m21 21-4.35-4.35"></path>
-                            </svg>
-                            <input
-                                type="text"
-                                id="manual-search"
-                                class="search-input"
-                                placeholder="Поиск ресторанов и блюд..."
-                                autocomplete="off"
-                            >
-                        </div>
-                    </nav>
+# ------------- Настройки -------------
+BASE_WINDOW_W, BASE_WINDOW_H = 1100, 620
+BACKGROUND_IMAGE = "background.png"
+TEXT = "RMB ZONE"
+FONT_NAME = None
+BASE_FONT_SIZE = 160
+LETTER_DELAY = 0.10
+LETTER_DURATION = 0.85
+TOTAL_WAIT_AFTER = 0.6
+FPS = 60
 
-                    <div class="header-actions">
-                        <button class="icon-btn cart-btn" id="cart-btn" aria-label="Корзина">
-                            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="9" cy="21" r="1"></circle>
-                                <circle cx="20" cy="21" r="1"></circle>
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                            </svg>
-                            <span class="cart-badge" id="cart-count">0</span>
-                        </button>
+LETTER_GRADIENT = [(255, 155, 20), (255, 205, 60)]
+OUTLINE_COLOR = (18, 25, 40)
+SHADOW_COLOR = (10, 12, 20)
 
-                        <div class="user-area" id="user-area">
-                            <button class="login-btn" id="login-button">Войти</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
+BUTTON_TEXT = "⟳ Заново"
+BUTTON_FONT_SIZE = 28
+BUTTON_PADDING = (18, 10)
+BUTTON_BG = (40, 48, 60)
+BUTTON_HOVER_BG = (60, 75, 95)
+BUTTON_TEXT_COLOR = (235, 240, 250)
 
-        <main class="main-content">
-            <div class="container">
-                <section class="hero-section">
-                    <div class="hero-card">
-                        <div class="hero-content">
-                            <div class="hero-text">
-                                <h1 class="hero-title">Не знаете, что поесть?</h1>
-                                <p class="hero-subtitle">Опишите настроение и бюджет — AI предложит идеальные варианты</p>
+BG_FADE_DURATION = 2.2
+BG_EASE_POWER = 2.0
+POST_SHOW_DELAY = 10.0
+BG_DARKEN_ALPHA = 140
+LETTERS_START_AFTER_BG = 0.25
 
-                                <div class="ai-input-group">
-                                    <textarea
-                                        id="ai-prompt"
-                                        class="ai-textarea"
-                                        rows="3"
-                                        placeholder="Например: Хочу что-то сытное до 600₽"
-                                    ></textarea>
+# стартовать в полноэкранном режиме? (True/False)
+START_FULLSCREEN = True
+# отступ по ширине, в долях, чтобы текст не прилипал к краям
+H_MARGIN_RATIO = 0.08
+# максимальная доля высоты, которую буквам можно занимать
+MAX_TEXT_HEIGHT_RATIO = 0.52
+# минимальный размер шрифта
+MIN_FONT_SIZE = 28
+# -------------------------------------
 
-                                    <div class="ai-actions">
-                                        <button class="btn btn-primary" id="ai-button">
-                                            <span id="ai-button-text">Найти блюдо</span>
-                                            <svg id="ai-loader" class="spinner hidden" width="20" height="20" viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"></circle>
-                                                <path fill="currentColor" d="M12 2a10 10 0 0 1 10 10h-4a6 6 0 0 0-6-6V2z"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="btn btn-secondary" id="ai-clear">Очистить</button>
-                                    </div>
-                                </div>
-                            </div>
+def clamp(x, a=0.0, b=1.0): return max(a, min(b, x))
 
-                            <div class="ai-result-wrapper" id="ai-result-container">
-                                <div class="ai-placeholder" id="ai-placeholder">
-                                    <svg class="ai-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                                        <path d="M20 3v4m-2-2h4"></path>
-                                    </svg>
-                                    <p class="ai-placeholder-text">Здесь появятся рекомендации...</p>
-                                </div>
+def ease_out_back(x):
+    c1 = 1.70158; c3 = c1 + 1
+    return 1 + c3 * (x - 1) ** 3 + c1 * (x - 1) ** 2
 
-                                <div class="ai-result hidden" id="ai-result">
-                                    <h3 class="ai-result-title">Рекомендации:</h3>
-                                    <div class="ai-output" id="ai-output"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+def ease_in_out_pow(x, power=2.0):
+    if x < 0.5:
+        return 0.5 * ((2 * x) ** power)
+    else:
+        return 1 - 0.5 * ((2 * (1 - x)) ** power)
 
-                <section class="categories-section">
-                    <div class="categories-scroll" id="categories-container"></div>
-                </section>
+def horizontal_gradient(size, left_color, right_color):
+    w, h = size
+    surf = pygame.Surface((w, h), pygame.SRCALPHA)
+    for x in range(w):
+        t = x / max(w - 1, 1)
+        r = int(left_color[0] * (1 - t) + right_color[0] * t)
+        g = int(left_color[1] * (1 - t) + right_color[1] * t)
+        b = int(left_color[2] * (1 - t) + right_color[2] * t)
+        pygame.draw.line(surf, (r, g, b), (x, 0), (x, h))
+    return surf
 
-                <section class="restaurants-section">
-                    <div class="restaurant-grid" id="restaurant-grid"></div>
-                </section>
-            </div>
-        </main>
+def create_styled_letter_surface(ch, font):
+    glyph = font.render(ch, True, (255,255,255)).convert_alpha()
+    w, h = glyph.get_size()
+    if w == 0 or h == 0:
+        return pygame.Surface((int(font.get_height()*0.4), font.get_height()), pygame.SRCALPHA), pygame.Surface((0,0), pygame.SRCALPHA)
+    grad = horizontal_gradient((w, h), LETTER_GRADIENT[0], LETTER_GRADIENT[1])
+    colored = grad.copy()
+    colored.blit(glyph, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
+    outline = pygame.Surface((w+8, h+8), pygame.SRCALPHA)
+    offsets = [(-3,0),(3,0),(0,-3),(0,3),(-2,-2),(2,2)]
+    dark_glyph = font.render(ch, True, OUTLINE_COLOR).convert_alpha()
+    for ox,oy in offsets:
+        outline.blit(dark_glyph, (ox+4, oy+4))
+    outline.blit(colored, (4,4))
+    shadow = pygame.Surface((w+12, h+12), pygame.SRCALPHA)
+    dark_glyph2 = font.render(ch, True, SHADOW_COLOR).convert_alpha()
+    for sx in (3,4,5):
+        shadow.blit(dark_glyph2, (sx+6, sx+6))
+    return outline, shadow
 
-        <button class="support-btn" id="support-btn" aria-label="Поддержка">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-        </button>
+def layout_letters(font):
+    letters = list(TEXT)
+    letter_surfs = []; shadow_surfs = []; widths = []
+    for ch in letters:
+        surf, shadow = create_styled_letter_surface(ch, font)
+        letter_surfs.append(surf); shadow_surfs.append(shadow); widths.append(surf.get_width())
+    total_w = sum(widths)
+    return letters, letter_surfs, shadow_surfs, widths, total_w
 
-        <div class="modal-overlay" id="auth-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button class="icon-btn modal-back hidden" id="auth-back-button" aria-label="Назад">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="19" y1="12" x2="5" y2="12"></line>
-                            <polyline points="12 19 5 12 12 5"></polyline>
-                        </svg>
-                    </button>
-                    <h2 class="modal-title" id="auth-title">Войдите</h2>
-                    <button class="icon-btn modal-close" id="auth-close-button" aria-label="Закрыть">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
+def make_button_surface(text, font):
+    text_surf = font.render(text, True, BUTTON_TEXT_COLOR).convert_alpha()
+    tw, th = text_surf.get_size()
+    bw = tw + BUTTON_PADDING[0]*2; bh = th + BUTTON_PADDING[1]*2
+    surf = pygame.Surface((bw,bh), pygame.SRCALPHA)
+    surf.blit(text_surf, (BUTTON_PADDING[0], BUTTON_PADDING[1]))
+    return surf, (bw,bh)
 
-                <div class="modal-body">
-                    <div id="auth-screens">
-                        <div id="screen-main" class="auth-screen">
-                            <div class="tabs" id="login-method-buttons">
-                                <button class="tab active" id="tab-email">Почта</button>
-                                <button class="tab" id="tab-phone">Телефон</button>
-                            </div>
+def load_background_image(path, target_size, cover=True):
+    if not path or not os.path.isfile(path):
+        return None
+    try:
+        img = pygame.image.load(path).convert()
+        iw, ih = img.get_size()
+        tw, th = target_size
+        if cover:
+            scale = max(tw/iw, th/ih)
+        else:
+            scale = min(tw/iw, th/ih)
+        new_w, new_h = max(1,int(iw*scale)), max(1,int(ih*scale))
+        img = pygame.transform.smoothscale(img, (new_w, new_h))
+        surf = pygame.Surface((tw, th)).convert()
+        x = (tw - new_w)//2; y = (th - new_h)//2
+        surf.blit(img, (x,y))
+        return surf
+    except Exception as e:
+        print("Error loading background:", e)
+        return None
 
-                            <div id="login-email-screen" class="auth-form">
-                                <div class="form-group">
-                                    <input
-                                        type="text"
-                                        id="login-email-input"
-                                        class="input"
-                                        placeholder="Email или логин"
-                                        autocomplete="email"
-                                    >
-                                </div>
+class Scene:
+    def __init__(self, screen, win_w, win_h):
+        self.screen = screen
+        self.win_w = win_w; self.win_h = win_h
+        self.fullscreen = False
+        self.rebuild_all()
+        self.reset_animation()
+        # hide cursor initially
+        pygame.mouse.set_visible(False)
+        self.cursor_visible = False
 
-                                <div class="form-group">
-                                    <div class="input-with-icon">
-                                        <input
-                                            type="password"
-                                            id="login-password-input"
-                                            class="input"
-                                            placeholder="Пароль"
-                                            autocomplete="current-password"
-                                        >
-                                        <button class="input-icon-btn" id="toggle-login-pw" type="button">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                <circle cx="12" cy="12" r="3"></circle>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
+    def rebuild_all(self):
+        # вычисляем font_size так, чтобы текст уместился по ширине и не превышал высоты
+        # стартуем с базового размера, масштабируем по min(win/base)
+        sx = self.win_w / BASE_WINDOW_W; sy = self.win_h / BASE_WINDOW_H
+        scale = min(sx, sy)
+        font_size = max(MIN_FONT_SIZE, int(BASE_FONT_SIZE * scale))
+        # позволим несколько итераций уменьшать шрифт при необходимости
+        max_text_width = int(self.win_w * (1.0 - H_MARGIN_RATIO*2))
+        max_text_height = int(self.win_h * MAX_TEXT_HEIGHT_RATIO)
 
-                                <div class="form-actions">
-                                    <button class="btn btn-dark btn-full" id="login-submit-button">Войти</button>
-                                    <button class="btn btn-light btn-full" id="go-to-register-button">Создать аккаунт</button>
-                                </div>
-                            </div>
+        # создаём и проверяем; если не влезаеет — уменьшаем
+        while font_size >= MIN_FONT_SIZE:
+            try:
+                font_candidate = pygame.font.Font(FONT_NAME, font_size)
+            except Exception:
+                font_candidate = pygame.font.SysFont(None, font_size, bold=True)
+            letters, letter_surfs, shadow_surfs, widths, total_w = layout_letters(font_candidate)
+            text_height = font_candidate.get_height()
+            if total_w <= max_text_width and text_height <= max_text_height:
+                # подошло
+                self.font_main = font_candidate
+                self.letters = letters
+                self.letter_surfs = letter_surfs
+                self.shadow_surfs = shadow_surfs
+                self.widths = widths
+                self.total_w = total_w
+                break
+            font_size -= 2
+        else:
+            # если дошли до минимума — используем последний candidate
+            try:
+                self.font_main = pygame.font.Font(FONT_NAME, MIN_FONT_SIZE)
+            except Exception:
+                self.font_main = pygame.font.SysFont(None, MIN_FONT_SIZE, bold=True)
+            self.letters, self.letter_surfs, self.shadow_surfs, self.widths, self.total_w = layout_letters(self.font_main)
 
-                            <div id="login-phone-screen" class="auth-form hidden">
-                                <div class="form-group">
-                                    <div class="phone-input">
-                                        <button class="phone-code-btn">
-                                            <span id="country-code-display">+7</span>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polyline points="6 9 12 15 18 9"></polyline>
-                                            </svg>
-                                        </button>
-                                        <input
-                                            type="tel"
-                                            id="login-phone-input"
-                                            class="input phone-number-input"
-                                            placeholder="Номер телефона"
-                                            autocomplete="tel"
-                                        >
-                                    </div>
-                                </div>
+        # baseline: центрируем горизонтально; вертикально чуть выше центра
+        self.base_x = (self.win_w - self.total_w)//2
+        self.base_y = self.win_h//2 - int(self.font_main.get_height()*0.35)
 
-                                <button class="btn btn-dark btn-full" id="phone-submit-button">Получить код</button>
-                            </div>
-                        </div>
+        # button font scaled
+        btn_font_size = max(16, int(BUTTON_FONT_SIZE * (min(self.win_w/BASE_WINDOW_W, self.win_h/BASE_WINDOW_H))))
+        try:
+            self.font_button = pygame.font.Font(FONT_NAME, btn_font_size)
+        except Exception:
+            self.font_button = pygame.font.SysFont(None, btn_font_size, bold=True)
+        self.btn_surf_content, (self.btn_w, self.btn_h) = make_button_surface(BUTTON_TEXT, self.font_button)
+        self.btn_x = (self.win_w - self.btn_w)//2
+        self.btn_y = self.win_h - self.btn_h - int(40 * (min(self.win_w/BASE_WINDOW_W, self.win_h/BASE_WINDOW_H)))
+        self.btn_rect = pygame.Rect(self.btn_x, self.btn_y, self.btn_w, self.btn_h)
 
-                        <div id="screen-code" class="auth-screen hidden">
-                            <p class="text-center text-secondary">
-                                Мы отправили код на номер <strong id="code-phone-display"></strong>
-                            </p>
+        # load bg cover
+        self.bg_img = load_background_image(BACKGROUND_IMAGE, (self.win_w, self.win_h), cover=True)
+        if self.bg_img is None:
+            self.bg_img = pygame.Surface((self.win_w, self.win_h)).convert()
+            self.bg_img.fill((130,200,255))
+        self.overlay = pygame.Surface((self.win_w, self.win_h), pygame.SRCALPHA)
+        self.overlay.fill((0,0,0, BG_DARKEN_ALPHA))
 
-                            <div class="form-group">
-                                <input
-                                    type="text"
-                                    id="sms-code-input"
-                                    class="input code-input"
-                                    maxlength="4"
-                                    placeholder="••••"
-                                    autocomplete="one-time-code"
-                                >
-                                <p class="error-message hidden" id="code-error-message">Неверный код</p>
-                            </div>
+    def resize(self, win_w, win_h):
+        self.win_w = win_w; self.win_h = win_h
+        self.rebuild_all()
 
-                            <div class="form-actions">
-                                <button class="btn btn-primary btn-full" id="code-submit-button">Подтвердить</button>
-                                <button class="btn btn-text btn-full" id="resend-code-button">Отправить код повторно</button>
-                            </div>
-                        </div>
+    def reset_animation(self):
+        self.start_time = time.time()
+        self.bg_fade_start = self.start_time
+        self.letters_start_time = self.bg_fade_start + BG_FADE_DURATION + LETTERS_START_AFTER_BG
+        self.letters_finished = False
+        self.post_timer_start = None
+        self.post_visible = False
+        self.post_fade = 0.0
+        # hide cursor while playing
+        pygame.mouse.set_visible(False)
+        self.cursor_visible = False
 
-                        <div id="screen-register" class="auth-screen hidden">
-                            <p class="text-center text-secondary">Создайте аккаунт</p>
+    def update_and_draw(self):
+        now = time.time()
+        # bg fade with easing
+        bg_progress_raw = clamp((now - self.bg_fade_start)/BG_FADE_DURATION)
+        bg_progress = ease_in_out_pow(bg_progress_raw, BG_EASE_POWER)
+        bg_alpha = int(bg_progress*255)
+        temp_bg = self.bg_img.copy()
+        temp_bg.set_alpha(bg_alpha if bg_alpha < 255 else None)
+        self.screen.blit(temp_bg, (0,0))
+        self.screen.blit(self.overlay, (0,0))
+        bg_visible_enough = (bg_progress_raw >= 0.98)
 
-                            <div class="tabs" id="register-method-buttons">
-                                <button class="tab active" id="reg-tab-phone">Телефон</button>
-                                <button class="tab" id="reg-tab-email">Почта</button>
-                            </div>
+        # letters animation starting at letters_start_time
+        last_letter_end = 0.0
+        x = self.base_x
+        for i, surf in enumerate(self.letter_surfs):
+            w = surf.get_width()
+            letter_start = self.letters_start_time + i*LETTER_DELAY
+            progress = clamp((now - letter_start)/LETTER_DURATION)
+            shadow = self.shadow_surfs[i]; outline = surf
+            if progress > 0:
+                eased = ease_out_back(clamp(progress))
+                scale = 0.65 + 0.45 * eased
+                alpha = int(clamp(progress)*255)
+                bounce = -math.sin(clamp(progress)*math.pi) * 18 * (1 - eased*0.12)
+                ow, oh = outline.get_size()
+                sw = max(1, int(ow*scale)); sh = max(1, int(oh*scale))
+                scaled_outline = pygame.transform.smoothscale(outline, (sw, sh))
+                sw2, sh2 = shadow.get_size()
+                scaled_shadow = pygame.transform.smoothscale(shadow, (max(1,int(sw2*scale)), max(1,int(sh2*scale))))
+                y = int(self.base_y + bounce - (sh - oh)/2)
+                shadow_x = x - (scaled_shadow.get_width() - outline.get_width())//2 + 6
+                shadow_y = y + 6
+                scaled_shadow.set_alpha(int(alpha*0.9))
+                self.screen.blit(scaled_shadow, (shadow_x, shadow_y))
+                draw_x = x - (scaled_outline.get_width() - outline.get_width())//2
+                scaled_outline.set_alpha(alpha)
+                self.screen.blit(scaled_outline, (draw_x, y))
+            x += w
+            last_letter_end = letter_start + LETTER_DURATION
 
-                            <div id="register-phone-screen" class="auth-form">
-                                <div class="form-group">
-                                    <div class="phone-input">
-                                        <button class="phone-code-btn">
-                                            <span>+7</span>
-                                        </button>
-                                        <input
-                                            type="tel"
-                                            id="register-phone-input"
-                                            class="input phone-number-input"
-                                            placeholder="Номер телефона"
-                                            autocomplete="tel"
-                                        >
-                                    </div>
-                                </div>
+        if time.time() >= last_letter_end + TOTAL_WAIT_AFTER:
+            self.letters_finished = True
 
-                                <button class="btn btn-primary btn-full" id="register-phone-submit-button">Продолжить</button>
-                            </div>
+        # start post timer only when bg visible enough & letters finished
+        if bg_visible_enough and self.letters_finished and self.post_timer_start is None:
+            self.post_timer_start = time.time()
 
-                            <div id="register-email-screen" class="auth-form hidden">
-                                <div class="form-group">
-                                    <input
-                                        type="email"
-                                        id="register-email-input"
-                                        class="input"
-                                        placeholder="Почта"
-                                        autocomplete="email"
-                                    >
-                                </div>
+        if self.post_timer_start is not None:
+            elapsed_post = time.time() - self.post_timer_start
+            if elapsed_post >= POST_SHOW_DELAY:
+                self.post_visible = True
+            if elapsed_post >= POST_SHOW_DELAY:
+                self.post_fade = clamp((elapsed_post - POST_SHOW_DELAY)/0.9, 0.0, 1.0)
 
-                                <div class="form-group">
-                                    <div class="input-with-icon">
-                                        <input
-                                            type="password"
-                                            id="register-password-input"
-                                            class="input"
-                                            placeholder="Пароль"
-                                            autocomplete="new-password"
-                                        >
-                                        <button class="input-icon-btn" id="toggle-reg-pw" type="button">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                <circle cx="12" cy="12" r="3"></circle>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="password-strength">
-                                        <div class="password-strength-bar" id="pw-strength-bar"></div>
-                                    </div>
-                                </div>
+        # show cursor when post visible (only once)
+        if (self.post_visible or self.post_fade > 0.0) and not self.cursor_visible:
+            pygame.mouse.set_visible(True)
+            self.cursor_visible = True
 
-                                <div class="form-group">
-                                    <input
-                                        type="password"
-                                        id="register-confirm-password-input"
-                                        class="input"
-                                        placeholder="Повторите пароль"
-                                        autocomplete="new-password"
-                                    >
-                                </div>
+        # draw post button/hint if visible or fading
+        if self.post_visible or self.post_fade > 0.0:
+            mx, my = pygame.mouse.get_pos()
+            hover = self.btn_rect.collidepoint(mx, my)
+            bg_col = BUTTON_HOVER_BG if hover else BUTTON_BG
+            btn_bg_surf = pygame.Surface((self.btn_w, self.btn_h), pygame.SRCALPHA)
+            radius = 10
+            pygame.draw.rect(btn_bg_surf, bg_col, (0,0,self.btn_w,self.btn_h), border_radius=radius)
+            pygame.draw.rect(btn_bg_surf, (30,38,50), (0,0,self.btn_w,self.btn_h), width=2, border_radius=radius)
+            btn_alpha = int(self.post_fade*255)
+            btn_bg_surf.set_alpha(btn_alpha)
+            self.screen.blit(btn_bg_surf, (self.btn_x, self.btn_y))
+            text_surf = self.btn_surf_content.copy()
+            text_surf.set_alpha(btn_alpha)
+            self.screen.blit(text_surf, (self.btn_x, self.btn_y))
+            hint_font = pygame.font.SysFont(None, max(14, int(self.font_button.get_height()*0.6)))
+            hint = hint_font.render("Анимация завершена — нажми «Заново», чтобы повторить", True, (220,230,240))
+            hint.set_alpha(int(self.post_fade*255))
+            hx = (self.win_w - hint.get_width())//2
+            self.screen.blit(hint, (hx, self.btn_y - 24))
 
-                                <button class="btn btn-primary btn-full" id="register-email-submit-button">Зарегистрироваться</button>
 
-                                <p class="text-terms">Продолжая, вы соглашаетесь с Условиями использования</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+def main():
+    pygame.init()
+    pygame.display.set_caption("RMB Zone — Intro (responsive)")
+    flags = pygame.FULLSCREEN if START_FULLSCREEN else pygame.RESIZABLE
+    if START_FULLSCREEN:
+        screen = pygame.display.set_mode((0,0), flags)
+    else:
+        screen = pygame.display.set_mode((BASE_WINDOW_W, BASE_WINDOW_H), flags)
+    clock = pygame.time.Clock()
+    win_w, win_h = screen.get_size()
+    scene = Scene(screen, win_w, win_h)
 
-    <script src="java.js"></script>
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.VIDEORESIZE:
+                new_w, new_h = max(200, event.w), max(120, event.h)
+                screen = pygame.display.set_mode((new_w, new_h), pygame.RESIZABLE)
+                scene.screen = screen
+                scene.resize(new_w, new_h)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                elif event.key == pygame.K_f:
+                    scene.fullscreen = not scene.fullscreen
+                    if scene.fullscreen:
+                        screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+                    else:
+                        screen = pygame.display.set_mode((BASE_WINDOW_W, BASE_WINDOW_H), pygame.RESIZABLE)
+                    scene.screen = screen
+                    nw, nh = screen.get_size()
+                    scene.resize(nw, nh)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mx, my = event.pos
+                    if scene.post_visible and scene.btn_rect.collidepoint(mx, my):
+                        scene.reset_animation()
+
+        scene.screen.fill((0,0,0))
+        scene.update_and_draw()
+
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
+    main()
+
+    </p>
 </body>
 </html>
