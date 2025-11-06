@@ -1,13 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RMB Zone — Просмотр кода</title>
+  <!-- Prism for syntax highlighting + line numbers -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+  <style>
+    :root{--bg:#0b0f14;--panel:#0f1720;--accent:#ff9b14}
+    body{margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;background:linear-gradient(180deg,#071019, #0b1016);color:#e6eef8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .container{width:100%;max-width:1200px;background:var(--panel);border-radius:12px;box-shadow:0 10px 40px rgba(2,6,23,0.7);overflow:hidden}
+    header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    header h1{font-size:16px;margin:0;font-weight:600}
+    .controls{display:flex;gap:10px;align-items:center}
+    button{background:#0b1220;border:1px solid rgba(255,255,255,0.04);color:inherit;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.03)}
+    main{padding:18px}
+    pre.prism-container{max-height:70vh;overflow:auto;border-radius:8px}
+    .meta{font-size:13px;color:rgba(230,238,248,0.6);margin-bottom:10px}
+    .actions{display:flex;gap:8px;align-items:center}
+    .small{font-size:12px;color:rgba(230,238,248,0.6)}
+    @media (max-width:700px){.container{padding:0;margin:8px}}
+  </style>
 </head>
 <body>
-    <p>
-        # rmb_zone_intro_responsive_cursor.py
+  <div class="container" role="main">
+    <header>
+      <h1>Просмотр кода — <span style="color:var(--accent)">rmb_zone_intro_responsive_cursor.py</span></h1>
+      <div class="controls">
+        <div class="actions">
+          <button id="downloadBtn">⬇️ Скачать .py</button>
+          <button id="copyBtn">📋 Копировать</button>
+          <button id="rawBtn" class="secondary">🔧 Показать raw</button>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="meta">Файл готов для просмотра — подсветка синтаксиса, нумерация строк, скачивание.</div>
+
+      <!-- Code will be inserted into <code> using textContent from the script block (so no escaping needed) -->
+      <pre id="codeBlock" class="line-numbers prism-container"><code id="codeEl" class="language-python">loading...</code></pre>
+    </main>
+  </div>
+
+  <!-- The original Python source is embedded here in a script tag of type text/plain so it's not parsed by the browser. -->
+  <script id="pycode" type="text/plain">
+# rmb_zone_intro_responsive_cursor.py
 """
 Responsive RMB Zone intro — Pygame
 - Автоподгонка шрифта, адаптивный layout при resize/fullscreen
@@ -358,7 +397,52 @@ def main():
 
 if __name__ == "__main__":
     main()
+  </script>
 
-    </p>
+  <!-- Prism + plugins -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+  <script>
+    // insert code into <code> safely using textContent (no HTML escaping required)
+    const raw = document.getElementById('pycode').textContent.replace(/\r\n/g,'\n');
+    const codeEl = document.getElementById('codeEl');
+    codeEl.textContent = raw;
+    Prism.highlightElement(codeEl);
+
+    // copy button
+    document.getElementById('copyBtn').addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(raw);
+        alert('Код скопирован в буфер обмена');
+      }catch(e){
+        alert('Не удалось скопировать — используйте выделение и Ctrl+C');
+      }
+    });
+
+    // download button
+    document.getElementById('downloadBtn').addEventListener('click', ()=>{
+      const blob = new Blob([raw], {type:'text/x-python'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'rmb_zone_intro_responsive_cursor.py';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // raw toggle
+    let rawVisible = false;
+    document.getElementById('rawBtn').addEventListener('click', ()=>{
+      const pre = document.getElementById('codeBlock');
+      rawVisible = !rawVisible;
+      if(rawVisible){
+        pre.style.whiteSpace = 'pre-wrap';
+        document.getElementById('rawBtn').textContent = '✖ Скрыть raw';
+      }else{
+        pre.style.whiteSpace = '';
+        document.getElementById('rawBtn').textContent = '🔧 Показать raw';
+      }
+    });
+  </script>
 </body>
 </html>
